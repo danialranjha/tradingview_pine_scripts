@@ -1,0 +1,24 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// This script makes it possible for you to see Debt to assets but with vaule of
+// intangibles and goodwill removed from assets
+// © danialr
+
+//@version=5
+indicator(title="Debt to assets minus goodwill and intangibles", shorttitle="Debt to assets", overlay=true)
+
+printTable(txt) => var table t = table.new(position.middle_right, 1, 1), table.cell(t, 0, 0, txt, bgcolor = color.yellow, text_size = size.huge)
+
+TA = request.financial(syminfo.tickerid, "TOTAL_ASSETS", "FQ", ignore_invalid_symbol = true)
+TotalAssets = TA * close
+LTD = request.financial(syminfo.tickerid, "LONG_TERM_DEBT", "FQ", ignore_invalid_symbol = true)
+LongTermDebt = LTD * close
+GW = request.financial(syminfo.tickerid, "GOODWILL", "FQ", ignore_invalid_symbol = true)
+Goodwill = GW * close
+IN = request.financial(syminfo.tickerid, "INTANGIBLES_NET", "FQ", ignore_invalid_symbol = true)
+Intangibles = IN * close
+
+DebtToAssets = (100 * LongTermDebt) / (TotalAssets - Goodwill - Intangibles)
+
+if not na(DebtToAssets) and barstate.islast
+    txt = "Debt to Assets\n" + str.tostring(DebtToAssets, format.percent) + " " + syminfo.currency
+    printTable(txt)
